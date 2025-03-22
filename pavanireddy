@@ -1,0 +1,50 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.cluster import KMeans
+from sklearn.preprocessing import StandardScaler, LabelEncoder
+def load_and_preprocess_data(file_path):
+    df = pd.read_csv(file_path)
+    print(df.isnull().sum())
+    df['Gender'] = LabelEncoder().fit_transform(df['Gender'])
+    return df
+def standardize_features(df):
+    features = df[['Annual Income (k$)', 'Spending Score (1-100)', 'Age', 'Gender']]
+    scaler = StandardScaler()
+    scaled_features = scaler.fit_transform(features)
+    return scaled_features, scaler
+def find_optimal_clusters(scaled_features, max_k=20):
+    inertia = []
+    k_values = range(1, max_k + 1)
+    for k in k_values:
+        kmeans = KMeans(n_clusters=k, random_state=42)
+        kmeans.fit(scaled_features)
+        inertia.append(kmeans.inertia_)
+
+    plt.figure(figsize=(8, 6))
+    plt.plot(k_values, inertia, marker='o', color='b')
+    plt.title('Elbow Method for Optimal k')
+    plt.xlabel('Number of Clusters (k)')
+    plt.ylabel('Inertia')
+    plt.xticks(k_values)
+    plt.grid(True)
+    plt.show()
+    return k_values, inertia
+def apply_kmeans(scaled_features, k):
+    kmeans = KMeans(n_clusters=k, random_state=42)
+    labels = kmeans.fit_predict(scaled_features)
+    return kmeans, labels
+def visualize_clusters(df, kmeans, scaler):
+    df['Cluster'] = kmeans.labels_
+    plt.figure(figsize=(10, 6))
+    sns.scatterplot(x='Annual Income (k$)', y='Spending Score (1-100)', hue='Cluster', palette='viridis', data=df, s=100, alpha=0.7)
+    centroids = kmeans.cluster_centers_
+    centroids_rescaled = scaler.inverse_transform(centroids)
+    plt.scatter(centroids_rescaled[:, 0], centroids_rescaled[:, 1], c='red', s=200, marker='X', label='Centroids')
+    plt.title('Mall Customer Segmentation')
+    plt.xlabel('Annual Income (k$)')
+    plt.ylabel('Spending Score (1-100)')
+    plt.legend()
+    plt.show()
+

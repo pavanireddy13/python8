@@ -4,8 +4,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler, LabelEncoder
-def load_and_preprocess_data(file_path):
-    df = pd.read_csv(file_path)
+def load_and_preprocess_data('/content/Mall_Customers.csv')
+    df = pd.read_csv('/content/Mall_Customers.csv')
     print(df.isnull().sum())
     df['Gender'] = LabelEncoder().fit_transform(df['Gender'])
     return df
